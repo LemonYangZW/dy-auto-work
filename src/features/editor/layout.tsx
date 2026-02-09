@@ -289,7 +289,6 @@ function RightSidebar() {
           <div className="space-y-3">
             <LabelIndustrial>AI 提示词</LabelIndustrial>
             <Textarea
-              variant="default"
               placeholder="描述你想要生成的内容..."
               className="min-h-[100px]"
             />

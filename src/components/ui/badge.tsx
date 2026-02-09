@@ -31,7 +31,7 @@ const badgeVariants = cva(
 
         // 次要 - 毛玻璃效果
         secondary: [
-          "bg-black/5 text-[var(--foreground)]",
+          "bg-[var(--muted)] text-[var(--foreground)]",
           "backdrop-blur-sm",
         ].join(" "),
 

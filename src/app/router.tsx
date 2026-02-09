@@ -6,6 +6,10 @@ import { ScriptWorkspace } from "@/features/editor/script";
 import { StoryboardWorkspace } from "@/features/editor/storyboard";
 import { TimelineWorkspace } from "@/features/editor/timeline";
 import { SettingsPage } from "@/features/settings";
+import { ProjectsPage } from "@/features/projects";
+import { TemplatesPage } from "@/features/templates";
+
+import { MainLayout } from "@/components/layout";
 
 export const router = createBrowserRouter([
   {
@@ -13,8 +17,25 @@ export const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        index: true,
-        element: <DashboardPage />,
+        element: <MainLayout />,
+        children: [
+          {
+            index: true,
+            element: <DashboardPage />,
+          },
+          {
+            path: "settings",
+            element: <SettingsPage />,
+          },
+          {
+            path: "projects",
+            element: <ProjectsPage />,
+          },
+          {
+            path: "templates",
+            element: <TemplatesPage />,
+          },
+        ],
       },
       {
         path: "editor/:projectId",
@@ -37,10 +58,6 @@ export const router = createBrowserRouter([
             element: <TimelineWorkspace />,
           },
         ],
-      },
-      {
-        path: "settings",
-        element: <SettingsPage />,
       },
     ],
   },

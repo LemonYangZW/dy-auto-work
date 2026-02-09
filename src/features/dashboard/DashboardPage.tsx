@@ -10,7 +10,7 @@ import {
   ScrollArea,
   Input,
 } from "@/components/ui";
-import { Plus, Film, Clock, Settings, Search, FolderOpen, Sparkles } from "lucide-react";
+import { Plus, Film, Clock, Search, FolderOpen } from "lucide-react";
 
 // Mock 数据 - 后续会从 SQLite 读取
 const mockProjects = [
@@ -72,19 +72,13 @@ export function DashboardPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[var(--background)]">
-      {/* 顶部标题栏 - 毛玻璃效果 */}
-      <header className="h-16 flex items-center justify-between px-8 shrink-0 glass border-b-0">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-[14px] bg-[var(--primary)] flex items-center justify-center shadow-[var(--shadow-button)]">
-            <Sparkles className="w-5 h-5 text-white" strokeWidth={2} />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
-              抖音 AI 视频工作台
-            </h1>
-            <p className="text-xs text-[var(--muted-foreground)]">从创意到成片的全流程工具</p>
-          </div>
+    <div className="h-full flex flex-col min-h-0 overflow-hidden">
+      {/* 顶部搜索栏 */}
+      <header className="h-14 flex items-center justify-between px-8 shrink-0 border-b border-[var(--border)]">
+        <div>
+          <h1 className="text-lg font-bold tracking-tight text-[var(--foreground)]">
+            首页
+          </h1>
         </div>
 
         <div className="flex items-center gap-4">
@@ -92,22 +86,11 @@ export function DashboardPage() {
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
             <Input
-              variant="search"
-              inputSize="default"
               type="text"
               placeholder="搜索项目..."
-              className="w-72 pl-11"
+              className="w-72 pl-11 h-9 rounded-lg"
             />
           </div>
-
-          {/* 设置按钮 */}
-          <Button
-            onClick={() => navigate("/settings")}
-            variant="secondary"
-            size="icon"
-          >
-            <Settings className="w-4 h-4" strokeWidth={2} />
-          </Button>
         </div>
       </header>
 
@@ -130,7 +113,7 @@ export function DashboardPage() {
                 >
                   <CardHeader>
                     <div className="w-14 h-14 rounded-[18px] bg-[var(--primary)] flex items-center justify-center mb-4 shadow-[var(--shadow-button)]">
-                      <Plus className="w-7 h-7 text-white" strokeWidth={2} />
+                      <Plus className="w-7 h-7 text-[var(--primary-foreground)]" strokeWidth={2} />
                     </div>
                     <CardTitle>新建项目</CardTitle>
                     <CardDescription>从零开始创作新视频</CardDescription>

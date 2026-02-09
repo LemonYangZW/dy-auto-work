@@ -18,67 +18,64 @@ const cardVariants = cva(
   [
     "text-[var(--card-foreground)]",
     "transition-all duration-200 ease-out",
+    "border border-[var(--border)]",
   ].join(" "),
   {
     variants: {
       variant: {
         // 默认毛玻璃卡片
         default: [
-          "bg-white/60",
+          "bg-[var(--card)]",
           "backdrop-blur-[40px]",
           "rounded-[28px]",
-          "border border-white/60",
-          "shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06),inset_0_0_0_1px_rgba(255,255,255,0.6),0_0_0_1px_rgba(209,213,219,0.4)]",
+          "shadow-[var(--shadow-card)]",
         ].join(" "),
 
         // 重度毛玻璃 - 更强的模糊和阴影
         glass: [
-          "bg-white/70",
+          "bg-[var(--card-hover)]",
           "backdrop-blur-[60px]",
           "rounded-[40px]",
-          "border border-white/70",
-          "shadow-[0_24px_48px_-12px_rgba(0,0,0,0.08),inset_0_0_0_1px_rgba(255,255,255,0.7),0_0_0_1px_rgba(209,213,219,0.3)]",
+          "shadow-[var(--shadow-float)]",
         ].join(" "),
 
         // 悬浮卡片 - 强阴影
         elevated: [
-          "bg-white/80",
+          "bg-[var(--card-hover)]",
           "backdrop-blur-[40px]",
           "rounded-[28px]",
-          "border border-white/60",
-          "shadow-[0_24px_48px_-12px_rgba(0,0,0,0.1),inset_0_0_0_1px_rgba(255,255,255,0.6),0_0_0_1px_rgba(209,213,219,0.4)]",
-          "hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)]",
+          "shadow-[var(--shadow-float)]",
+          "hover:shadow-[var(--shadow-float)]",
           "hover:translate-y-[-2px]",
         ].join(" "),
 
         // 交互式卡片 - 带悬浮效果
         interactive: [
-          "bg-white/60",
+          "bg-[var(--card)]",
           "backdrop-blur-[40px]",
           "rounded-[28px]",
-          "border border-white/60",
-          "shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06),inset_0_0_0_1px_rgba(255,255,255,0.6),0_0_0_1px_rgba(209,213,219,0.4)]",
+          "shadow-[var(--shadow-card)]",
           "cursor-pointer",
-          "hover:bg-white/75",
-          "hover:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.1)]",
-          "hover:border-white/70",
+          "hover:bg-[var(--card-hover)]",
+          "hover:shadow-[var(--shadow-float)]",
+          "hover:border-[var(--border-outer)]",
           "active:scale-[0.98]",
         ].join(" "),
 
         // 凹陷卡片 - 用于输入区域
         inset: [
-          "bg-[rgba(243,244,246,0.5)]",
+          "bg-[var(--input)]",
           "rounded-[20px]",
-          "border border-[rgba(0,0,0,0.04)]",
-          "shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]",
+          "border border-[var(--border)]",
+          "shadow-[var(--shadow-inner)]",
         ].join(" "),
 
         // 纯净卡片 - 无模糊，纯白
         solid: [
-          "bg-white",
+          "bg-[var(--background-secondary)]",
           "rounded-[28px]",
-          "border border-[var(--border-outer)]",
-          "shadow-[0_8px_32px_-8px_rgba(0,0,0,0.06)]",
+          "border border-[var(--border)]",
+          "shadow-[var(--shadow-card)]",
         ].join(" "),
 
         // 透明卡片 - 仅边框

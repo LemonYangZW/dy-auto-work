@@ -1,4 +1,4 @@
-import { Button, ScrollArea, Separator, LabelIndustrial, Textarea } from "@/components/ui";
+import { Button, ScrollArea, Textarea } from "@/components/ui";
 import { Wand2, Bold, Italic, List, AlignLeft, Sparkles, Type, Heading1, Heading2 } from "lucide-react";
 
 /**
@@ -25,7 +25,7 @@ export function ScriptWorkspace() {
         <ToolbarButton icon={<AlignLeft />} />
         <div className="w-px h-5 bg-black/10 mx-2" />
 
-        <Button variant="accent" size="sm" className="gap-2 ml-auto">
+        <Button variant="default" size="sm" className="gap-2 ml-auto">
           <Wand2 className="w-4 h-4" strokeWidth={2} />
           AI 扩写
         </Button>
@@ -128,9 +128,8 @@ function ContentBlock({
           className="w-full text-lg font-bold bg-transparent border-none outline-none mb-3 placeholder:text-[var(--muted-foreground)]/40"
         />
         <Textarea
-          variant="ghost"
           defaultValue={content}
-          className="min-h-[60px] text-[var(--muted-foreground)] leading-relaxed resize-none"
+          className="min-h-[60px] text-[var(--muted-foreground)] leading-relaxed resize-none bg-transparent border-none"
         />
       </div>
     </div>

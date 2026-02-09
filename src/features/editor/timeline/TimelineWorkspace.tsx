@@ -1,7 +1,6 @@
-import { Button, ScrollArea, Card, LabelIndustrial } from "@/components/ui";
+import { Button, ScrollArea, Card } from "@/components/ui";
 import {
   Play,
-  Pause,
   SkipBack,
   SkipForward,
   Volume2,

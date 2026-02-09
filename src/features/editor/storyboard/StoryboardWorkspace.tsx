@@ -1,4 +1,4 @@
-import { Button, Card, CardContent, Badge, ScrollArea, LabelIndustrial } from "@/components/ui";
+import { Button, Card, CardContent, Badge, ScrollArea } from "@/components/ui";
 import { Plus, Image, RefreshCw, GripVertical, Wand2, LayoutGrid } from "lucide-react";
 
 // Mock 分镜数据
@@ -61,7 +61,7 @@ export function StoryboardWorkspace() {
             <Plus className="w-4 h-4" strokeWidth={2} />
             添加分镜
           </Button>
-          <Button variant="accent" size="sm" className="gap-2">
+          <Button variant="default" size="sm" className="gap-2">
             <Wand2 className="w-4 h-4" strokeWidth={2} />
             批量生成
           </Button>

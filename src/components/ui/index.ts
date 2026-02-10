@@ -10,3 +10,6 @@ export { Separator } from "./separator";
 export { ScrollArea, ScrollBar } from "./scroll-area";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
+export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./select";
+export { Switch } from "./switch";
+export { Slider } from "./slider";

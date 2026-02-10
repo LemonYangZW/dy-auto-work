@@ -9,44 +9,19 @@ import {
   Badge,
   ScrollArea,
   Input,
+  Skeleton,
 } from "@/components/ui";
 import { Plus, Film, Clock, Search, FolderOpen } from "lucide-react";
-
-// Mock 数据 - 后续会从 SQLite 读取
-const mockProjects = [
-  {
-    id: "proj-001",
-    name: "美食探店 - 火锅篇",
-    status: "draft",
-    updatedAt: "2026-02-09 10:30",
-    thumbnail: null,
-    scenesCount: 8,
-  },
-  {
-    id: "proj-002",
-    name: "产品开箱 - 新款手机",
-    status: "rendering",
-    updatedAt: "2026-02-08 15:20",
-    thumbnail: null,
-    scenesCount: 12,
-  },
-  {
-    id: "proj-003",
-    name: "日常Vlog - 周末游玩",
-    status: "completed",
-    updatedAt: "2026-02-07 20:15",
-    thumbnail: null,
-    scenesCount: 15,
-  },
-];
+import { useProjects, useCreateProject } from "@/hooks/useProjectQueries";
 
 const statusMap: Record<
   string,
-  { label: string; variant: "default" | "secondary" | "outline" }
+  { label: string; variant: "default" | "secondary" | "outline" | "destructive" }
 > = {
   draft: { label: "草稿", variant: "outline" },
   rendering: { label: "渲染中", variant: "secondary" },
   completed: { label: "已完成", variant: "default" },
+  failed: { label: "失败", variant: "destructive" },
 };
 
 /**
@@ -60,15 +35,33 @@ const statusMap: Record<
  */
 export function DashboardPage() {
   const navigate = useNavigate();
+  const { data: projects = [], isLoading } = useProjects();
+  const createMutation = useCreateProject();
 
-  const handleCreateProject = () => {
-    // TODO: 创建新项目并跳转
-    const newProjectId = `proj-${Date.now()}`;
-    navigate(`/editor/${newProjectId}/script`);
+  const handleCreateProject = async () => {
+    try {
+      const project = await createMutation.mutateAsync({ name: "未命名项目" });
+      navigate(`/editor/${project.id}/script`);
+    } catch (err) {
+      console.error("Failed to create project:", err);
+    }
   };
 
   const handleOpenProject = (projectId: string) => {
     navigate(`/editor/${projectId}/script`);
+  };
+
+  const formatDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleString("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return iso;
+    }
   };
 
   return (
@@ -82,7 +75,6 @@ export function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* 搜索框 - 凹陷质感 */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted-foreground)]" />
             <Input
@@ -106,7 +98,6 @@ export function DashboardPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* 新建项目卡片 - 交互式 */}
                 <Card
                   variant="interactive"
                   onClick={handleCreateProject}
@@ -120,7 +111,6 @@ export function DashboardPage() {
                   </CardHeader>
                 </Card>
 
-                {/* 模板创建 - 禁用状态 */}
                 <Card variant="default" className="opacity-60 cursor-not-allowed">
                   <CardHeader>
                     <div className="w-14 h-14 rounded-[18px] bg-[var(--accent)]/10 flex items-center justify-center mb-4">
@@ -132,7 +122,6 @@ export function DashboardPage() {
                   </CardHeader>
                 </Card>
 
-                {/* 导入项目 - 禁用状态 */}
                 <Card variant="default" className="opacity-60 cursor-not-allowed">
                   <CardHeader>
                     <div className="w-14 h-14 rounded-[18px] bg-black/5 flex items-center justify-center mb-4">
@@ -153,12 +142,18 @@ export function DashboardPage() {
                   <span className="label-industrial">项目库</span>
                   <h2 className="text-2xl font-bold tracking-tight mt-2">最近项目</h2>
                 </div>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/projects")}>
                   查看全部
                 </Button>
               </div>
 
-              {mockProjects.length === 0 ? (
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-52 w-full rounded-[28px]" />
+                  ))}
+                </div>
+              ) : projects.length === 0 ? (
                 <Card variant="inset" className="py-16">
                   <div className="text-center text-[var(--muted-foreground)]">
                     <Film className="w-16 h-16 mx-auto mb-6 opacity-30" strokeWidth={1.5} />
@@ -168,13 +163,12 @@ export function DashboardPage() {
                 </Card>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockProjects.map((project) => (
+                  {projects.slice(0, 6).map((project) => (
                     <Card
                       key={project.id}
                       variant="interactive"
                       onClick={() => handleOpenProject(project.id)}
                     >
-                      {/* 缩略图区域 */}
                       <div className="aspect-video bg-gradient-to-br from-black/5 to-black/10 rounded-t-[27px] flex items-center justify-center overflow-hidden">
                         <Film className="w-12 h-12 text-[var(--muted-foreground)]/40" strokeWidth={1.5} />
                       </div>
@@ -194,11 +188,7 @@ export function DashboardPage() {
                         <div className="flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
                           <span className="flex items-center gap-1.5">
                             <Clock className="w-3.5 h-3.5" strokeWidth={2} />
-                            {project.updatedAt}
-                          </span>
-                          <span className="flex items-center gap-1.5">
-                            <Film className="w-3.5 h-3.5" strokeWidth={2} />
-                            {project.scenesCount} 个分镜
+                            {formatDate(project.updated_at)}
                           </span>
                         </div>
                       </CardContent>

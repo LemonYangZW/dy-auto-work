@@ -13,3 +13,4 @@ export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tool
 export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "./select";
 export { Switch } from "./switch";
 export { Slider } from "./slider";
+export { Skeleton } from "./skeleton";

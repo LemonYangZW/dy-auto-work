@@ -134,27 +134,32 @@ export function EditorLayout() {
 
       {/* 主内容区 - 三栏布局 */}
       <main className="flex-1 overflow-hidden p-2">
-        <Group orientation="horizontal" className="h-full gap-2">
+        <Group
+          orientation="horizontal"
+          id="editor-layout-v2"
+          className="h-full"
+          defaultLayout={{ "editor-left": 18, "editor-main": 60, "editor-right": 22 }}
+        >
           {/* 左侧面板 - 资源库 */}
-          <Panel id="left-sidebar" defaultSize={18} minSize={15} maxSize={25}>
+          <Panel id="editor-left" defaultSize={18} minSize={12}>
             <LeftSidebar />
           </Panel>
 
-          {/* 分隔条 - 极简风格 */}
-          <PanelSeparator className="w-1 rounded-full bg-transparent hover:bg-black/10 transition-colors cursor-col-resize" />
+          {/* 拖拽分隔条 */}
+          <PanelSeparator className="w-1.5 rounded-full bg-black/[0.08] hover:bg-black/20 active:bg-black/30 transition-colors" />
 
           {/* 中间工作区 */}
-          <Panel id="main-content" defaultSize={60} minSize={40}>
+          <Panel id="editor-main" defaultSize={60} minSize={30}>
             <Card variant="solid" className="h-full overflow-hidden">
               <Outlet />
             </Card>
           </Panel>
 
-          {/* 分隔条 */}
-          <PanelSeparator className="w-1 rounded-full bg-transparent hover:bg-black/10 transition-colors cursor-col-resize" />
+          {/* 拖拽分隔条 */}
+          <PanelSeparator className="w-1.5 rounded-full bg-black/[0.08] hover:bg-black/20 active:bg-black/30 transition-colors" />
 
           {/* 右侧面板 - 属性/AI */}
-          <Panel id="right-sidebar" defaultSize={22} minSize={18} maxSize={30}>
+          <Panel id="editor-right" defaultSize={22} minSize={15}>
             <RightSidebar />
           </Panel>
         </Group>

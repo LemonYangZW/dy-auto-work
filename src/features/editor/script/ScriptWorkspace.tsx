@@ -1,16 +1,90 @@
-import { Button, ScrollArea, Textarea } from "@/components/ui";
-import { Wand2, Bold, Italic, List, AlignLeft, Sparkles, Type, Heading1, Heading2 } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
+import { Button, ScrollArea, Textarea, Skeleton } from "@/components/ui";
+import { Wand2, Bold, Italic, List, AlignLeft, Sparkles, Heading1, Heading2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useProject, useLatestScript, useCreateScriptVersion } from "@/hooks/useProjectQueries";
 
 /**
  * 剧本工作区 - Zen-iOS Hybrid 风格
  *
- * 设计规范:
- * - Notion 风格富文本编辑器
- * - 毛玻璃工具栏
- * - 凹陷编辑区域
- * - 呼吸感排版
+ * 数据流:
+ * - 从 script_versions 表读取最新版本
+ * - 自动保存至新版本（防抖 2s）
+ * - 标题通过 project.name 获取
  */
 export function ScriptWorkspace() {
+  const { projectId } = useParams();
+  const { data: project } = useProject(projectId ?? "");
+  const { data: latestScript, isLoading } = useLatestScript(projectId ?? "");
+  const createVersion = useCreateScriptVersion();
+
+  const [content, setContent] = useState("");
+  const [hasUnsaved, setHasUnsaved] = useState(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isInitialized = useRef(false);
+
+  // 从数据库加载最新内容
+  useEffect(() => {
+    if (latestScript?.content && !isInitialized.current) {
+      setContent(latestScript.content);
+      isInitialized.current = true;
+    } else if (!isLoading && !latestScript && !isInitialized.current) {
+      setContent("");
+      isInitialized.current = true;
+    }
+  }, [latestScript, isLoading]);
+
+  // 自动保存（防抖 2s）
+  const scheduleSave = useCallback(
+    (newContent: string) => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+      setHasUnsaved(true);
+      autoSaveTimer.current = setTimeout(async () => {
+        if (!projectId) return;
+        try {
+          await createVersion.mutateAsync({
+            project_id: projectId,
+            content: newContent,
+            source: "manual",
+          });
+          setHasUnsaved(false);
+        } catch {
+          toast.error("自动保存失败");
+        }
+      }, 2000);
+    },
+    [projectId, createVersion],
+  );
+
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    };
+  }, []);
+
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+    scheduleSave(newContent);
+  };
+
+  // 字数统计
+  const charCount = content.replace(/\s/g, "").length;
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="h-12 border-b border-black/5 shrink-0" />
+        <div className="max-w-3xl mx-auto p-10 w-full space-y-6">
+          <Skeleton className="h-10 w-2/3" />
+          <Skeleton className="h-40 w-full rounded-[20px]" />
+          <Skeleton className="h-32 w-full rounded-[20px]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* 工具栏 - 毛玻璃风格 */}
@@ -38,37 +112,19 @@ export function ScriptWorkspace() {
       {/* 编辑区 */}
       <ScrollArea className="flex-1">
         <div className="max-w-3xl mx-auto p-10">
-          {/* 标题输入 */}
-          <input
-            type="text"
-            placeholder="输入视频标题..."
-            className="w-full text-3xl font-bold bg-transparent border-none outline-none mb-8 placeholder:text-[var(--muted-foreground)]/40 tracking-tight"
-            defaultValue="美食探店 - 火锅篇"
-          />
+          {/* 标题 (只读，来自项目名称) */}
+          <h1 className="w-full text-3xl font-bold mb-8 tracking-tight text-[var(--foreground)]">
+            {project?.name ?? "未命名项目"}
+          </h1>
 
-          {/* 内容编辑区 - 模拟 Notion 块 */}
-          <div className="space-y-6">
-            <ContentBlock
-              title="场景一：开场"
-              content="镜头从店面外观缓缓推进，展示热气腾腾的招牌。背景音乐轻快，配合城市夜景氛围。"
-              index={1}
+          {/* 剧本内容编辑区 */}
+          <div className="p-6 rounded-[20px] bg-white/50 hover:bg-white/70 border border-transparent hover:border-white/60 hover:shadow-sm transition-all">
+            <Textarea
+              value={content}
+              onChange={(e) => handleContentChange(e.target.value)}
+              placeholder="在这里编写你的视频剧本...&#10;&#10;可以按场景分段描述镜头内容、台词、画面要求等。"
+              className="min-h-[400px] text-base text-[var(--foreground)] leading-relaxed resize-none bg-transparent border-none focus-visible:ring-0"
             />
-            <ContentBlock
-              title="场景二：店内环境"
-              content="展示店内装修风格，突出特色元素。采访店员或老板，介绍店铺历史。"
-              index={2}
-            />
-            <ContentBlock
-              title="场景三：菜品展示"
-              content="特写镜头展示招牌菜品，强调食材新鲜。加入沸腾的锅底画面，增强食欲感。"
-              index={3}
-            />
-
-            {/* 添加新块提示 */}
-            <div className="p-4 rounded-[16px] border-2 border-dashed border-black/10 text-center text-[var(--muted-foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer">
-              <Type className="w-5 h-5 mx-auto mb-2" strokeWidth={2} />
-              <p className="text-sm">点击添加新场景</p>
-            </div>
           </div>
         </div>
       </ScrollArea>
@@ -77,14 +133,29 @@ export function ScriptWorkspace() {
       <div className="h-10 border-t border-black/5 flex items-center justify-between px-6 text-xs text-[var(--muted-foreground)] shrink-0">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
-            已自动保存
+            {createVersion.isPending ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                保存中...
+              </>
+            ) : hasUnsaved ? (
+              <>
+                <span className="w-2 h-2 rounded-full bg-[var(--warning)]" />
+                未保存
+              </>
+            ) : (
+              <>
+                <span className="w-2 h-2 rounded-full bg-[var(--success)]" />
+                已自动保存
+              </>
+            )}
           </span>
+          {latestScript && (
+            <span>版本 {latestScript.version_no}</span>
+          )}
         </div>
         <div className="flex items-center gap-4">
-          <span>3 个场景</span>
-          <span>·</span>
-          <span>约 156 字</span>
+          <span>约 {charCount} 字</span>
         </div>
       </div>
     </div>
@@ -99,39 +170,5 @@ function ToolbarButton({ icon }: { icon: React.ReactNode }) {
     <Button variant="ghost" size="icon-sm" className="text-[var(--muted-foreground)] hover:text-[var(--foreground)]">
       <span className="[&>svg]:w-4 [&>svg]:h-4 [&>svg]:stroke-[2]">{icon}</span>
     </Button>
-  );
-}
-
-/**
- * 内容块组件
- */
-function ContentBlock({
-  title,
-  content,
-  index,
-}: {
-  title: string;
-  content: string;
-  index: number;
-}) {
-  return (
-    <div className="group relative">
-      {/* 场景序号 */}
-      <div className="absolute -left-12 top-0 w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-sm font-semibold text-[var(--muted-foreground)] opacity-0 group-hover:opacity-100 transition-opacity">
-        {index}
-      </div>
-
-      <div className="p-6 rounded-[20px] bg-white/50 hover:bg-white/70 border border-transparent hover:border-white/60 hover:shadow-sm transition-all">
-        <input
-          type="text"
-          defaultValue={title}
-          className="w-full text-lg font-bold bg-transparent border-none outline-none mb-3 placeholder:text-[var(--muted-foreground)]/40"
-        />
-        <Textarea
-          defaultValue={content}
-          className="min-h-[60px] text-[var(--muted-foreground)] leading-relaxed resize-none bg-transparent border-none"
-        />
-      </div>
-    </div>
   );
 }

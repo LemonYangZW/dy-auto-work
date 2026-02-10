@@ -79,6 +79,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
     // Sync Tauri window theme for macOS title bar
     const appWindow = getCurrentWindow();
+
     if (theme === "system") {
       appWindow
         .setTheme(null)

@@ -1,3 +1,4 @@
+import type React from "react";
 import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import { Group, Panel, Separator as PanelSeparator } from "react-resizable-panels";
 import {
@@ -28,7 +29,10 @@ import {
   Sparkles,
   Wand2,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useProject, useUpdateProject } from "@/hooks/useProjectQueries";
 
 /**
  * 编辑器主布局 - Zen-iOS Hybrid 风格
@@ -43,6 +47,8 @@ export function EditorLayout() {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const location = useLocation();
+  const { data: project } = useProject(projectId ?? "");
+  const updateMutation = useUpdateProject();
 
   // 根据当前路径确定激活的 tab
   const getActiveTab = () => {
@@ -56,12 +62,50 @@ export function EditorLayout() {
     navigate(`/editor/${projectId}/${value}`);
   };
 
+  const handlePreview = () => {
+    navigate(`/editor/${projectId}/video`);
+    toast.info("已切换到视频预览");
+  };
+
+  const handleSave = async () => {
+    if (!projectId || !project) return;
+    try {
+      await updateMutation.mutateAsync({
+        projectId,
+        input: { name: project.name },
+      });
+      toast.success("项目已保存");
+    } catch {
+      toast.error("保存失败，请重试");
+    }
+  };
+
+  const handleExport = () => {
+    toast.info("导出功能开发中，敬请期待");
+  };
+
+  const statusLabel: Record<string, string> = {
+    draft: "草稿",
+    rendering: "渲染中",
+    completed: "已完成",
+    failed: "失败",
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-[var(--background)]">
-      {/* 顶部工具栏 - 毛玻璃效果 */}
-      <header className="h-14 flex items-center justify-between px-5 shrink-0 glass border-b-0">
+    <div className="h-screen flex flex-col bg-[var(--background)] pt-[var(--titlebar-height)]">
+      {/* macOS Overlay 标题栏拖拽区域 */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[60]"
+        data-tauri-drag-region
+        style={{ height: "var(--titlebar-height)" }}
+      />
+      {/* 顶部工具栏 - 毛玻璃效果 + 可拖拽 */}
+      <header
+        className="h-14 flex items-center justify-between px-5 shrink-0 glass border-b-0"
+        data-tauri-drag-region
+      >
         {/* 左侧：返回 + 项目名 */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" data-tauri-no-drag>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -73,13 +117,13 @@ export function EditorLayout() {
           <div className="h-6 w-px bg-black/10" />
 
           <div>
-            <span className="text-sm font-semibold text-[var(--foreground)]">未命名项目</span>
-            <span className="ml-2 text-xs text-[var(--muted-foreground)]">草稿</span>
+            <span className="text-sm font-semibold text-[var(--foreground)]">{project?.name ?? "加载中..."}</span>
+            <span className="ml-2 text-xs text-[var(--muted-foreground)]">{statusLabel[project?.status ?? ""] ?? "草稿"}</span>
           </div>
         </div>
 
         {/* 中间：模式切换 - 毛玻璃分段控制器 */}
-        <div className="glass rounded-full p-1">
+        <div className="glass rounded-full p-1" data-tauri-no-drag>
           <Tabs value={getActiveTab()} onValueChange={handleTabChange}>
             <TabsList className="bg-transparent gap-1">
               <TabsTrigger
@@ -108,7 +152,7 @@ export function EditorLayout() {
         </div>
 
         {/* 右侧：操作按钮 */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tauri-no-drag>
           <Button variant="ghost" size="icon-sm" title="撤销">
             <Undo className="w-4 h-4" strokeWidth={2} />
           </Button>
@@ -118,14 +162,24 @@ export function EditorLayout() {
 
           <div className="h-6 w-px bg-black/10 mx-1" />
 
-          <Button variant="ghost" size="icon-sm" title="预览">
+          <Button variant="ghost" size="icon-sm" title="预览" onClick={handlePreview}>
             <Play className="w-4 h-4" strokeWidth={2} />
           </Button>
-          <Button variant="secondary" size="icon-sm" title="保存">
-            <Save className="w-4 h-4" strokeWidth={2} />
+          <Button
+            variant="secondary"
+            size="icon-sm"
+            title="保存"
+            onClick={handleSave}
+            disabled={updateMutation.isPending}
+          >
+            {updateMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" strokeWidth={2} />
+            ) : (
+              <Save className="w-4 h-4" strokeWidth={2} />
+            )}
           </Button>
 
-          <Button size="sm" className="gap-2 ml-2">
+          <Button size="sm" className="gap-2 ml-2" onClick={handleExport}>
             <Download className="w-4 h-4" strokeWidth={2} />
             导出
           </Button>

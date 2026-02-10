@@ -10,6 +10,14 @@ import {
   ScrollArea,
   Input,
   Skeleton,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui";
 import { Film, Clock, Search, Plus, Filter, Trash2 } from "lucide-react";
 import { useProjects, useCreateProject, useDeleteProject } from "@/hooks/useProjectQueries";
@@ -30,6 +38,7 @@ const statusMap: Record<
 export function ProjectsPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const { data: projects = [], isLoading } = useProjects();
   const createMutation = useCreateProject();
   const deleteMutation = useDeleteProject();
@@ -51,10 +60,15 @@ export function ProjectsPage() {
     }
   };
 
-  const handleDeleteProject = async (e: React.MouseEvent, projectId: string) => {
+  const handleDeleteProject = (e: React.MouseEvent, projectId: string) => {
     e.stopPropagation();
-    if (window.confirm("确定要删除这个项目吗？此操作无法撤销。")) {
-      await deleteMutation.mutateAsync(projectId);
+    setDeleteTarget(projectId);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteTarget) {
+      await deleteMutation.mutateAsync(deleteTarget);
+      setDeleteTarget(null);
     }
   };
 
@@ -172,6 +186,24 @@ export function ProjectsPage() {
           )}
         </div>
       </ScrollArea>
+
+      {/* 删除确认弹窗 */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确定删除项目？</AlertDialogTitle>
+            <AlertDialogDescription>
+              此操作无法撤销，项目及其所有数据将被永久删除。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

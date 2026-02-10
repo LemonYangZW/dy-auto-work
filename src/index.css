@@ -16,7 +16,7 @@
    ============================================ */
 :root {
   /* 标题栏安全区高度 - 由 JS 运行时根据平台设置 */
-  /* macOS: 52px (沉浸式 overlay 标题栏) | Windows/Linux: 0px */
+  /* macOS: 28px (Overlay 标题栏) | Windows/Linux: 0px */
   --titlebar-height: 0px;
 
   /* 底色 - iOS 系统级灰，杜绝纯白 */
@@ -396,18 +396,9 @@ body {
 /* ============================================
    Tauri 桌面应用专用
    ============================================ */
-.no-drag {
-  -webkit-user-select: none;
-  user-select: none;
-}
 
-.drag-region {
-  -webkit-app-region: drag;
-}
-
-.no-drag-region {
-  -webkit-app-region: no-drag;
-}
+/* 拖拽区域 - 仅使用 Tauri 原生 data-tauri-drag-region 属性 */
+/* 注意：不使用 -webkit-app-region，避免与 Tauri IPC 拖拽机制冲突 */
 
 /* ============================================
    iOS 连续曲率圆角

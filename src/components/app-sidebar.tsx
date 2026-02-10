@@ -86,6 +86,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="floating">
+      {/* macOS Overlay 标题栏下方的拖拽安全区 */}
+      <div
+        data-tauri-drag-region
+        style={{ height: "var(--titlebar-height)" }}
+      />
       {/* Header with Logo */}
       <SidebarHeader>
         <SidebarMenu>

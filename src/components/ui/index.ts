@@ -1,4 +1,6 @@
 // Zen-iOS Hybrid 设计系统组件导出
+
+// --- 基础组件 (原有) ---
 export { Button, buttonVariants } from "./button";
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, cardVariants } from "./card";
 export { Input } from "./input";
@@ -14,3 +16,46 @@ export { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSepa
 export { Switch } from "./switch";
 export { Slider } from "./slider";
 export { Skeleton } from "./skeleton";
+export { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./alert-dialog";
+export { Toaster } from "./sonner";
+
+// --- 新增组件 ---
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./accordion";
+export { Alert, AlertTitle, AlertDescription } from "./alert";
+export { AspectRatio } from "./aspect-ratio";
+export { Avatar, AvatarImage, AvatarFallback, AvatarBadge, AvatarGroup, AvatarGroupCount } from "./avatar";
+export { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbPage, BreadcrumbSeparator, BreadcrumbEllipsis } from "./breadcrumb";
+export { ButtonGroup, ButtonGroupSeparator, ButtonGroupText, buttonGroupVariants } from "./button-group";
+export { Calendar, CalendarDayButton } from "./calendar";
+export { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "./carousel";
+export type { CarouselApi } from "./carousel";
+export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle } from "./chart";
+export type { ChartConfig } from "./chart";
+export { Checkbox } from "./checkbox";
+export { Collapsible, CollapsibleTrigger, CollapsibleContent } from "./collapsible";
+export { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxGroup, ComboboxLabel, ComboboxCollection, ComboboxEmpty, ComboboxSeparator, ComboboxChips, ComboboxChip, ComboboxChipsInput, ComboboxTrigger, ComboboxValue, useComboboxAnchor } from "./combobox";
+export { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandShortcut, CommandSeparator } from "./command";
+export { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, ContextMenuCheckboxItem, ContextMenuRadioItem, ContextMenuLabel, ContextMenuSeparator, ContextMenuShortcut, ContextMenuGroup, ContextMenuPortal, ContextMenuSub, ContextMenuSubContent, ContextMenuSubTrigger, ContextMenuRadioGroup } from "./context-menu";
+export { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogOverlay, DialogPortal, DialogTitle, DialogTrigger } from "./dialog";
+export { DirectionProvider, useDirection } from "./direction";
+export { Drawer, DrawerPortal, DrawerOverlay, DrawerTrigger, DrawerClose, DrawerContent, DrawerHeader, DrawerFooter, DrawerTitle, DrawerDescription } from "./drawer";
+export { DropdownMenu, DropdownMenuPortal, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuItem, DropdownMenuCheckboxItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuShortcut, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "./dropdown-menu";
+export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "./empty";
+export { Field, FieldLabel, FieldDescription, FieldError, FieldGroup, FieldLegend, FieldSeparator, FieldSet, FieldContent, FieldTitle } from "./field";
+export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField } from "./form";
+export { HoverCard, HoverCardTrigger, HoverCardContent } from "./hover-card";
+export { InputGroup, InputGroupAddon, InputGroupButton, InputGroupText, InputGroupInput, InputGroupTextarea } from "./input-group";
+export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "./input-otp";
+export { Item, ItemMedia, ItemContent, ItemActions, ItemGroup, ItemSeparator, ItemTitle, ItemDescription, ItemHeader, ItemFooter } from "./item";
+export { Kbd, KbdGroup } from "./kbd";
+export { Menubar, MenubarPortal, MenubarMenu, MenubarTrigger, MenubarContent, MenubarGroup, MenubarSeparator, MenubarLabel, MenubarItem, MenubarShortcut, MenubarCheckboxItem, MenubarRadioGroup, MenubarRadioItem, MenubarSub, MenubarSubTrigger, MenubarSubContent } from "./menubar";
+export { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "./native-select";
+export { NavigationMenu, NavigationMenuList, NavigationMenuItem, NavigationMenuContent, NavigationMenuTrigger, NavigationMenuLink, NavigationMenuIndicator, NavigationMenuViewport, navigationMenuTriggerStyle } from "./navigation-menu";
+export { Pagination, PaginationContent, PaginationLink, PaginationItem, PaginationPrevious, PaginationNext, PaginationEllipsis } from "./pagination";
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor, PopoverHeader, PopoverTitle, PopoverDescription } from "./popover";
+export { RadioGroup, RadioGroupItem } from "./radio-group";
+export { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "./resizable";
+export { Spinner } from "./spinner";
+export { Table, TableHeader, TableBody, TableFooter, TableHead, TableRow, TableCell, TableCaption } from "./table";
+export { Toggle, toggleVariants } from "./toggle";
+export { ToggleGroup, ToggleGroupItem } from "./toggle-group";

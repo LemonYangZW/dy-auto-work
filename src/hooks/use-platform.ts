@@ -3,7 +3,13 @@ import { platform } from "@tauri-apps/plugin-os";
 
 export type Platform = "macos" | "windows" | "linux" | "unknown";
 
-/** macOS 沉浸式标题栏安全高度 (px) — macOS Big Sur+ 标准标题栏 28px */
+/**
+ * macOS 标题栏安全高度 (px)
+ *
+ * 说明：
+ * - `titleBarStyle: "Overlay"` 模式下，Webview 延伸到标题栏区域，需要预留安全高度避免内容被遮挡。
+ * - 标准 macOS 标题栏高度为 28px。
+ */
 const MACOS_TITLEBAR_HEIGHT = 28;
 
 /**
@@ -39,7 +45,7 @@ export function usePlatform(): Platform {
  * 获取标题栏安全区高度并同步到 CSS 变量
  *
  * 在根组件中调用一次即可，会自动设置 `--titlebar-height` CSS 变量：
- * - macOS: 52px（沉浸式 overlay 标题栏）
+ * - macOS: 28px（Overlay 标题栏，需预留安全高度）
  * - Windows / Linux: 0px（使用系统原生标题栏）
  *
  * 其他组件通过 CSS `var(--titlebar-height)` 引用即可。

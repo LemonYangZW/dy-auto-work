@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { Button, ScrollArea, Card } from "@/components/ui";
 import {
   Play,
@@ -13,16 +15,39 @@ import {
   Image,
   Film,
 } from "lucide-react";
+import { useScenes } from "@/hooks/useProjectQueries";
 
 /**
  * 时间轴/视频工作区 - Zen-iOS Hybrid 风格
  *
- * 设计规范:
- * - 毛玻璃控制条
- * - 分层轨道设计
- * - 触觉反馈按钮
+ * 数据流:
+ * - 从 storyboard_scenes 表读取场景列表
+ * - 视频轨道根据场景动态渲染
+ * - 时间刻度根据总时长自动生成
  */
 export function TimelineWorkspace() {
+  const { projectId } = useParams();
+  const { data: scenes = [] } = useScenes(projectId ?? "");
+
+  const totalDurationMs = useMemo(
+    () => scenes.reduce((acc, s) => acc + s.duration_ms, 0),
+    [scenes],
+  );
+  const totalSeconds = Math.ceil(totalDurationMs / 1000);
+
+  // 生成时间刻度数组
+  const ticks = useMemo(
+    () => Array.from({ length: Math.max(totalSeconds + 1, 2) }, (_, i) => i),
+    [totalSeconds],
+  );
+
+  const formatTime = (ms: number) => {
+    const sec = Math.floor(ms / 1000);
+    const min = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(min).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* 预览区域 */}
@@ -34,7 +59,11 @@ export function TimelineWorkspace() {
               <Play className="w-10 h-10 ml-1" strokeWidth={1.5} />
             </div>
             <p className="text-lg font-medium text-[var(--foreground)]">视频预览</p>
-            <p className="text-sm mt-2">点击播放查看效果</p>
+            <p className="text-sm mt-2">
+              {scenes.length > 0
+                ? `${scenes.length} 个场景 · ${formatTime(totalDurationMs)}`
+                : "暂无分镜数据"}
+            </p>
           </div>
         </div>
 
@@ -54,7 +83,7 @@ export function TimelineWorkspace() {
 
           <div className="px-3 py-1 rounded-full bg-black/5">
             <span className="text-sm font-mono font-medium">00:00</span>
-            <span className="text-sm font-mono text-[var(--muted-foreground)]"> / 00:13</span>
+            <span className="text-sm font-mono text-[var(--muted-foreground)]"> / {formatTime(totalDurationMs)}</span>
           </div>
 
           <div className="w-px h-6 bg-black/10 mx-2" />
@@ -102,7 +131,7 @@ export function TimelineWorkspace() {
         {/* 时间刻度 */}
         <div className="h-7 border-b border-black/5 flex items-end px-24 shrink-0">
           <div className="flex-1 flex">
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map((sec) => (
+            {ticks.map((sec) => (
               <div key={sec} className="flex-1 border-l border-black/10 relative">
                 <span className="absolute -top-4 left-1 text-[10px] font-medium text-[var(--muted-foreground)]">
                   {sec}s
@@ -115,22 +144,29 @@ export function TimelineWorkspace() {
         {/* 轨道区域 */}
         <ScrollArea className="flex-1">
           <div className="p-4 space-y-2">
-            {/* 视频轨道 */}
+            {/* 视频轨道 - 根据真实场景渲染 */}
             <TrackRow
               icon={<Film className="w-4 h-4" strokeWidth={2} />}
               label="视频"
               color="accent"
             >
-              <div className="flex gap-1.5">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className="h-12 bg-[var(--accent)]/15 border border-[var(--accent)]/30 rounded-[12px] flex-1 flex items-center justify-center text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent)]/25 transition-colors cursor-pointer"
-                  >
-                    场景 {i}
-                  </div>
-                ))}
-              </div>
+              {scenes.length > 0 ? (
+                <div className="flex gap-1.5">
+                  {scenes.map((scene) => (
+                    <div
+                      key={scene.id}
+                      style={{ flex: scene.duration_ms }}
+                      className="h-12 bg-[var(--accent)]/15 border border-[var(--accent)]/30 rounded-[12px] flex items-center justify-center text-xs font-medium text-[var(--accent)] hover:bg-[var(--accent)]/25 transition-colors cursor-pointer"
+                    >
+                      场景 {scene.scene_index + 1}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-12 border-2 border-dashed border-black/10 rounded-[12px] flex items-center justify-center text-xs text-[var(--muted-foreground)]">
+                  暂无场景，请先在分镜中添加
+                </div>
+              )}
             </TrackRow>
 
             {/* 音频轨道 */}
@@ -139,9 +175,8 @@ export function TimelineWorkspace() {
               label="音频"
               color="success"
             >
-              <div className="h-12 bg-[var(--success)]/15 border border-[var(--success)]/30 rounded-[12px] flex items-center px-4 text-xs font-medium text-[var(--success)]">
-                <Music className="w-3.5 h-3.5 mr-2" strokeWidth={2} />
-                背景音乐.mp3
+              <div className="h-12 border-2 border-dashed border-black/10 rounded-[12px] flex items-center justify-center text-xs text-[var(--muted-foreground)]">
+                拖入音频文件
               </div>
             </TrackRow>
 
@@ -151,15 +186,8 @@ export function TimelineWorkspace() {
               label="字幕"
               color="muted"
             >
-              <div className="flex gap-1.5">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="h-10 bg-black/5 border border-black/10 rounded-[10px] flex-1 flex items-center justify-center text-xs font-medium text-[var(--muted-foreground)] hover:bg-black/10 transition-colors cursor-pointer"
-                  >
-                    字幕 {i}
-                  </div>
-                ))}
+              <div className="h-10 border-2 border-dashed border-black/10 rounded-[10px] flex items-center justify-center text-xs text-[var(--muted-foreground)]">
+                拖入字幕文件
               </div>
             </TrackRow>
           </div>

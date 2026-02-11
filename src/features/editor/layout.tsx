@@ -1,4 +1,3 @@
-import type React from "react";
 import { Outlet, useNavigate, useParams, useLocation } from "react-router-dom";
 import { Group, Panel, Separator as PanelSeparator } from "react-resizable-panels";
 import {
@@ -6,11 +5,8 @@ import {
   Tabs,
   TabsList,
   TabsTrigger,
-  ScrollArea,
-  Separator,
-  Textarea,
-  LabelIndustrial,
   Card,
+  Skeleton,
 } from "@/components/ui";
 import {
   ArrowLeft,
@@ -22,17 +18,14 @@ import {
   Redo,
   Play,
   Download,
-  FolderOpen,
-  Image,
-  Music,
-  Type,
-  Sparkles,
-  Wand2,
-  ChevronRight,
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useProject, useUpdateProject } from "@/hooks/useProjectQueries";
+import { useWorkerStatus, useTasks } from "@/hooks/useWorkerQueries";
+import { SidebarProvider, useSidebarContext } from "./context/sidebar-context";
+import { WorkerStatusBadge } from "./components/WorkerStatusBadge";
+import { TaskQueuePanel } from "./components/TaskQueuePanel";
 
 /**
  * 编辑器主布局 - Zen-iOS Hybrid 风格
@@ -42,13 +35,30 @@ import { useProject, useUpdateProject } from "@/hooks/useProjectQueries";
  * - 层级堆叠效果
  * - 大圆角和呼吸感间距
  * - 触觉反馈按钮
+ *
+ * Slot 模式:
+ * - 左右侧边栏内容由各 Workspace 通过 useSidebar Hook 注入
+ * - EditorLayout 仅作为容器，读取 SidebarContext 渲染插槽
  */
 export function EditorLayout() {
+  return (
+    <SidebarProvider>
+      <EditorLayoutContent />
+    </SidebarProvider>
+  );
+}
+
+function EditorLayoutContent() {
   const navigate = useNavigate();
   const { projectId } = useParams();
   const location = useLocation();
   const { data: project } = useProject(projectId ?? "");
   const updateMutation = useUpdateProject();
+  const { leftSidebar, rightSidebar } = useSidebarContext();
+
+  // 拉取初始 Worker 状态和任务列表，确保首屏数据可用
+  useWorkerStatus();
+  useTasks();
 
   // 根据当前路径确定激活的 tab
   const getActiveTab = () => {
@@ -183,6 +193,10 @@ export function EditorLayout() {
             <Download className="w-4 h-4" strokeWidth={2} />
             导出
           </Button>
+
+          <div className="h-6 w-px bg-black/10 mx-1" />
+
+          <WorkerStatusBadge />
         </div>
       </header>
 
@@ -194,9 +208,9 @@ export function EditorLayout() {
           className="h-full"
           defaultLayout={{ "editor-left": 18, "editor-main": 60, "editor-right": 22 }}
         >
-          {/* 左侧面板 - 资源库 */}
+          {/* 左侧面板 - 由 Workspace 通过 useSidebar 注入 */}
           <Panel id="editor-left" defaultSize={18} minSize={12}>
-            <LeftSidebar />
+            {leftSidebar ?? <SidebarFallback />}
           </Panel>
 
           {/* 拖拽分隔条 */}
@@ -212,9 +226,19 @@ export function EditorLayout() {
           {/* 拖拽分隔条 */}
           <PanelSeparator className="w-1.5 rounded-full bg-black/[0.08] hover:bg-black/20 active:bg-black/30 transition-colors" />
 
-          {/* 右侧面板 - 属性/AI */}
+          {/* 右侧面板 - 由 Workspace 通过 useSidebar 注入 + 底部任务队列 */}
           <Panel id="editor-right" defaultSize={22} minSize={15}>
-            <RightSidebar />
+            <div className="flex flex-col h-full gap-2">
+              <div className="flex-1 min-h-0">
+                {rightSidebar ?? <SidebarFallback />}
+              </div>
+              <Card variant="default" className="shrink-0 max-h-[240px] overflow-hidden">
+                <div className="px-3 pt-2 pb-1">
+                  <h3 className="text-xs font-semibold text-[var(--muted-foreground)]">任务队列</h3>
+                </div>
+                <TaskQueuePanel className="max-h-[200px]" />
+              </Card>
+            </div>
           </Panel>
         </Group>
       </main>
@@ -223,86 +247,37 @@ export function EditorLayout() {
 }
 
 /**
- * 左侧边栏 - 资源库 (毛玻璃风格)
+ * 侧边栏占位 — 在 Workspace 尚未注入内容时显示骨架屏
  */
-function LeftSidebar() {
+function SidebarFallback() {
   return (
     <Card variant="default" className="h-full flex flex-col overflow-hidden">
-      {/* 标签页切换 */}
-      <div className="p-4 border-b border-black/5">
-        <div className="flex gap-2">
-          <Button variant="secondary" size="sm" className="flex-1 justify-start gap-2">
-            <FolderOpen className="w-4 h-4" strokeWidth={2} />
-            项目
-          </Button>
-          <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2">
-            <Image className="w-4 h-4" strokeWidth={2} />
-            素材
-          </Button>
-        </div>
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-5 w-24" />
+        <Skeleton className="h-10 w-full rounded-[14px]" />
+        <Skeleton className="h-10 w-full rounded-[14px]" />
+        <Skeleton className="h-10 w-full rounded-[14px]" />
       </div>
-
-      {/* 资源列表 */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
-          {/* 场景列表 */}
-          <div>
-            <LabelIndustrial className="px-2 mb-3 block">场景大纲</LabelIndustrial>
-            <div className="space-y-1">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div
-                  key={i}
-                  className={`p-3 rounded-[14px] cursor-pointer transition-all duration-150 ${
-                    i === 1
-                      ? "bg-white shadow-sm border border-white/60"
-                      : "hover:bg-black/5"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm">场景 {i}</span>
-                    <ChevronRight className="w-4 h-4 text-[var(--muted-foreground)]" strokeWidth={2} />
-                  </div>
-                  <p className="text-xs text-[var(--muted-foreground)] line-clamp-1 mt-1">
-                    这是场景 {i} 的描述文字...
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <Separator className="bg-black/5" />
-
-          {/* 素材分类 */}
-          <div>
-            <LabelIndustrial className="px-2 mb-3 block">素材库</LabelIndustrial>
-            <div className="space-y-1">
-              <ResourceItem
-                icon={<Image className="w-4 h-4 text-[var(--accent)]" strokeWidth={2} />}
-                label="图片素材"
-                count={12}
-              />
-              <ResourceItem
-                icon={<Music className="w-4 h-4 text-[var(--success)]" strokeWidth={2} />}
-                label="音频素材"
-                count={3}
-              />
-              <ResourceItem
-                icon={<Type className="w-4 h-4 text-[var(--muted-foreground)]" strokeWidth={2} />}
-                label="字幕文件"
-                count={1}
-              />
-            </div>
-          </div>
-        </div>
-      </ScrollArea>
     </Card>
   );
 }
 
 /**
- * 资源项组件
+ * 属性行组件 — 供各侧边栏复用
  */
-function ResourceItem({
+export function PropertyRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm text-[var(--muted-foreground)]">{label}</span>
+      <span className="text-sm font-medium">{value}</span>
+    </div>
+  );
+}
+
+/**
+ * 资源项组件 — 供各侧边栏复用
+ */
+export function ResourceItem({
   icon,
   label,
   count,
@@ -318,88 +293,6 @@ function ResourceItem({
       <span className="text-xs text-[var(--muted-foreground)] bg-black/5 px-2 py-0.5 rounded-full">
         {count}
       </span>
-    </div>
-  );
-}
-
-/**
- * 右侧边栏 - AI 控制 & 属性 (毛玻璃风格)
- */
-function RightSidebar() {
-  return (
-    <Card variant="default" className="h-full flex flex-col overflow-hidden">
-      {/* 标题 */}
-      <div className="p-4 border-b border-black/5">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[10px] bg-gradient-to-br from-[var(--accent)] to-[var(--success)] flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" strokeWidth={2} />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold">AI 助手</h2>
-            <p className="text-[10px] text-[var(--muted-foreground)]">智能创作辅助</p>
-          </div>
-        </div>
-      </div>
-
-      {/* AI 控制区 */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
-          {/* AI 生成区域 */}
-          <div className="space-y-3">
-            <LabelIndustrial>AI 提示词</LabelIndustrial>
-            <Textarea
-              placeholder="描述你想要生成的内容..."
-              className="min-h-[100px]"
-            />
-            <Button className="w-full gap-2">
-              <Wand2 className="w-4 h-4" strokeWidth={2} />
-              生成内容
-            </Button>
-          </div>
-
-          <Separator className="bg-black/5" />
-
-          {/* 属性面板 */}
-          <div className="space-y-3">
-            <LabelIndustrial>属性</LabelIndustrial>
-            <Card variant="inset" className="p-4 space-y-3">
-              <PropertyRow label="时长" value="3.0 秒" />
-              <PropertyRow label="分辨率" value="1080 × 1920" />
-              <PropertyRow label="帧率" value="30 fps" />
-            </Card>
-          </div>
-
-          <Separator className="bg-black/5" />
-
-          {/* 导出设置预览 */}
-          <div className="space-y-3">
-            <LabelIndustrial>导出预设</LabelIndustrial>
-            <Card variant="interactive" className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold">抖音竖屏</div>
-                  <div className="text-xs text-[var(--muted-foreground)] mt-1">
-                    1080×1920 · 30fps · H.264
-                  </div>
-                </div>
-                <ChevronRight className="w-5 h-5 text-[var(--muted-foreground)]" strokeWidth={2} />
-              </div>
-            </Card>
-          </div>
-        </div>
-      </ScrollArea>
-    </Card>
-  );
-}
-
-/**
- * 属性行组件
- */
-function PropertyRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm text-[var(--muted-foreground)]">{label}</span>
-      <span className="text-sm font-medium">{value}</span>
     </div>
   );
 }

@@ -16,6 +16,8 @@ import {
   Film,
 } from "lucide-react";
 import { useScenes } from "@/hooks/useProjectQueries";
+import { useSidebar } from "../hooks/use-sidebar";
+import { TimelineLeftSidebar, TimelineRightSidebar } from "./components/TimelineSidebar";
 
 /**
  * 时间轴/视频工作区 - Zen-iOS Hybrid 风格
@@ -24,10 +26,14 @@ import { useScenes } from "@/hooks/useProjectQueries";
  * - 从 storyboard_scenes 表读取场景列表
  * - 视频轨道根据场景动态渲染
  * - 时间刻度根据总时长自动生成
+ * - 左右侧边栏通过 useSidebar Slot 注入
  */
 export function TimelineWorkspace() {
   const { projectId } = useParams();
   const { data: scenes = [] } = useScenes(projectId ?? "");
+
+  // Slot 模式：注入视频模式专用侧边栏
+  useSidebar(<TimelineLeftSidebar />, <TimelineRightSidebar />);
 
   const totalDurationMs = useMemo(
     () => scenes.reduce((acc, s) => acc + s.duration_ms, 0),

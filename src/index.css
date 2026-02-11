@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@plugin "@tailwindcss/typography";
 /*
   ---break---
 */
@@ -559,4 +560,147 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* ============================================
+   MDXEditor 样式覆盖 - Zen-iOS Hybrid 适配
+   ============================================ */
+
+/* 编辑器容器 — 全宽填满父级 Card */
+.script-editor-wrapper .mdxeditor {
+  --accentBase: var(--foreground);
+  --accentBgSubtle: var(--secondary);
+  --accentText: var(--foreground);
+  --basePageBg: transparent;
+  --baseBase: var(--border);
+  --baseBgSubtle: var(--secondary);
+  --baseBgActive: rgba(0, 0, 0, 0.06);
+  --baseText: var(--foreground);
+  --baseTextHighContrast: var(--foreground);
+  --baseTextLowContrast: var(--muted-foreground);
+  font-family: inherit;
+  border: none;
+  background: transparent;
+}
+
+/* 工具栏 - 全宽贴顶 */
+.script-editor-wrapper .mdxeditor-toolbar {
+  background: var(--card);
+  border: none;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 0;
+  padding: 4px 16px;
+  gap: 2px;
+  flex-wrap: nowrap;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* 工具栏按钮 */
+.script-editor-wrapper .mdxeditor-toolbar button[data-state] {
+  border-radius: 8px;
+  padding: 4px 6px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.script-editor-wrapper .mdxeditor-toolbar button[data-state]:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.script-editor-wrapper .mdxeditor-toolbar button[data-state="on"] {
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--foreground);
+}
+
+/* 工具栏分隔线 */
+.script-editor-wrapper .mdxeditor-toolbar [data-orientation="vertical"] {
+  height: 20px;
+  width: 1px;
+  background: rgba(0, 0, 0, 0.1);
+  margin: 0 4px;
+}
+
+/* 下拉选择器（标题类型） */
+.script-editor-wrapper .mdxeditor-toolbar select,
+.script-editor-wrapper .mdxeditor-toolbar [role="combobox"] {
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* 编辑区域 — 全宽，适度内边距 */
+.script-editor-wrapper .mdxeditor-rich-text-editor {
+  padding: 24px 32px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+}
+
+/* 编辑区 prose 样式微调 */
+.script-editor-wrapper .mdxeditor .prose {
+  color: var(--foreground);
+  line-height: 1.8;
+}
+
+.script-editor-wrapper .mdxeditor .prose h1,
+.script-editor-wrapper .mdxeditor .prose h2,
+.script-editor-wrapper .mdxeditor .prose h3 {
+  color: var(--foreground);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.script-editor-wrapper .mdxeditor .prose p {
+  margin-bottom: 0.75em;
+}
+
+.script-editor-wrapper .mdxeditor .prose blockquote {
+  border-left-color: rgba(0, 0, 0, 0.15);
+  color: var(--muted-foreground);
+}
+
+.script-editor-wrapper .mdxeditor .prose hr {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.script-editor-wrapper .mdxeditor .prose a {
+  color: #0A84FF;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* 占位文字 — 虚化效果 */
+.script-editor-wrapper .mdxeditor [data-placeholder]::before {
+  color: var(--muted-foreground) !important;
+  opacity: 0.4 !important;
+  font-style: italic;
+}
+
+.script-editor-wrapper .mdxeditor .ProseMirror p.is-editor-empty:first-child::before,
+.script-editor-wrapper .mdxeditor .ProseMirror .is-empty::before {
+  color: var(--muted-foreground) !important;
+  opacity: 0.4 !important;
+  font-style: italic;
+}
+
+/* MDXEditor 内置 placeholder 样式覆盖 */
+.script-editor-wrapper [class*="placeholder"] {
+  color: var(--muted-foreground) !important;
+  opacity: 0.4 !important;
+  font-style: italic;
+}
+
+/* Popover 弹出样式 (链接编辑等) */
+.mdxeditor-popup-container {
+  z-index: 100;
+}
+
+.mdxeditor-popup-container [role="dialog"] {
+  border-radius: 12px;
+  box-shadow: var(--shadow-float);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }

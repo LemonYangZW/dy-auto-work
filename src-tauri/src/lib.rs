@@ -1,7 +1,9 @@
 mod commands;
 mod database;
+mod ipc;
 mod models;
 mod repository;
+mod worker;
 
 use tauri::Manager;
 
@@ -15,9 +17,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
-            let state = database::init_app_state(&app.handle()).map_err(|e| {
-                std::io::Error::new(std::io::ErrorKind::Other, e)
+            let state = database::init_app_state(app.handle()).map_err(|e| {
+                std::io::Error::other(e)
             })?;
             app.manage(state);
             Ok(())
@@ -37,6 +40,12 @@ pub fn run() {
             commands::scene_commands::update_scene,
             commands::scene_commands::delete_scene,
             commands::scene_commands::reorder_scenes,
+            commands::worker_commands::get_worker_status,
+            commands::worker_commands::submit_task,
+            commands::worker_commands::cancel_task,
+            commands::worker_commands::list_tasks,
+            commands::worker_commands::start_worker,
+            commands::worker_commands::stop_worker,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

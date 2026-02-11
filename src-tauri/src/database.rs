@@ -3,8 +3,11 @@ use std::{fs, path::PathBuf, sync::Mutex};
 use rusqlite::Connection;
 use tauri::{AppHandle, Manager, Runtime, State};
 
+use crate::worker::manager::SharedWorkerManager;
+
 pub struct AppState {
     pub db: Mutex<Connection>,
+    pub worker_manager: SharedWorkerManager,
 }
 
 const DATABASE_FILE_NAME: &str = "dy_auto_work.sqlite3";
@@ -67,6 +70,24 @@ CREATE INDEX IF NOT EXISTS idx_storyboard_scenes_project_id ON storyboard_scenes
 CREATE INDEX IF NOT EXISTS idx_storyboard_scenes_script_version ON storyboard_scenes(script_version_id);
 CREATE INDEX IF NOT EXISTS idx_assets_project_id ON assets(project_id);
 CREATE INDEX IF NOT EXISTS idx_assets_scene_id ON assets(scene_id);
+"#,
+r#"
+CREATE TABLE IF NOT EXISTS ai_tasks (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL,
+    task_type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    progress REAL NOT NULL DEFAULT 0.0,
+    config_json TEXT,
+    output_json TEXT,
+    error TEXT,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_ai_tasks_project_id ON ai_tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_ai_tasks_status ON ai_tasks(status);
 "#];
 
 pub fn init_app_state<R: Runtime>(app: &AppHandle<R>) -> Result<AppState, String> {
@@ -88,8 +109,11 @@ pub fn init_app_state<R: Runtime>(app: &AppHandle<R>) -> Result<AppState, String
 
     run_migrations(&conn)?;
 
+    let worker_manager = crate::worker::manager::WorkerManager::new();
+
     Ok(AppState {
         db: Mutex::new(conn),
+        worker_manager,
     })
 }
 
